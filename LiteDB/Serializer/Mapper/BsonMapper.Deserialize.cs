@@ -111,9 +111,13 @@ namespace LiteDB
             {
                 return Convert.ChangeType(value.RawValue, type);
             }
-
+#if !NETFULL
             // enum value is a string
             else if (type.GetTypeInfo().IsEnum)
+#else
+            // enum value is a string
+            else if (type.IsEnum)
+#endif
             {
                 return Enum.Parse(type, value.AsString);
             }
@@ -151,12 +155,14 @@ namespace LiteDB
 
                 var o = Reflection.CreateInstance(type);
 
+#if !NETFULL
                 if (o is IDictionary && type.GetTypeInfo().IsGenericType)
                 {
-#if !NETFULL
                     var k = type.GetTypeInfo().GenericTypeArguments[0];
                     var t = type.GetTypeInfo().GenericTypeArguments[1];
 #else
+                if (o is IDictionary && type.GetTypeInfo().IsGenericType)
+                {
                     var k = type.GetGenericArguments()[0];
                     var t = type.GetGenericArguments()[1];
 #endif
